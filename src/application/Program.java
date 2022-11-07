@@ -1,46 +1,43 @@
 package application;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.Scanner;
 
-import model.entities.CarRental;
-import model.entities.Vehicle;
-import model.services.BrazilTaxServie;
-import model.services.RentalService;
+import entities.Contract;
+import entities.Installment;
+import services.ContractService;
 
 public class Program {
 
 	public static void main(String[] args) {
 		Locale.setDefault(Locale.US);
 		Scanner sc = new Scanner(System.in);
+		//definir o formato de Date
+		DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 		
-		DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+		System.out.println("Entre os dados do contrato:");
+		System.out.print("Numero:");
+		int number = sc.nextInt();
+		System.out.print("Data (dd/MM/yyyy): ");
+		LocalDate date = LocalDate.parse(sc.next(), fmt);
+		System.out.print("Valor do contrato: ");
+		double totalValue = sc.nextDouble();
 		
-		System.out.println("Entre com os dados do aluguel");
-		System.out.print("Modelo do carro: ");
-		String carModel = sc.nextLine();
-		System.out.print("Retirada (dd/MM/yyyy hh:mm): ");
-		LocalDateTime start = LocalDateTime.parse(sc.nextLine(), fmt);
-		System.out.print("Retorno (dd/MM/yyyy hh:mm): ");
-		LocalDateTime finish = LocalDateTime.parse(sc.nextLine(), fmt);
+		Contract obj = new Contract(number, date, totalValue);
 		
-		CarRental cr = new CarRental(start, finish, new Vehicle(carModel));
+		System.out.print("Entre com o numero de parcelas: ");
+		int n = sc.nextInt();
 		
-		System.out.print("Entre com o preço por hora: ");
-		double pricePerHour = sc.nextDouble();
-		System.out.print("Entre com o preço por dia: ");
-		double pricePerDay = sc.nextDouble();
+		ContractService	contractService = new ContractService(null);
 		
-		RentalService rentalService = new RentalService(pricePerHour, pricePerDay, new BrazilTaxServie());
+		contractService.processContract(obj, n);
 		
-		rentalService.processInvoice(cr);
-		
-		System.out.println("FATURA:");
-		System.out.println("Pagamento basico: " + String.format("%.2f",cr.getInvoice().getBasicPayment()));
-		System.out.println("Imposto: " + String.format("%.2f",cr.getInvoice().getTax()));
-		System.out.println("Pagamento total: " + String.format("%.2f",cr.getInvoice().getTotalPayment()));
+		System.out.println("Parcelas:");
+		for(Installment installment : obj.getInstalments()) {
+			System.out.println(installment);
+		}
 		
 		sc.close();
 	}
